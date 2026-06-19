@@ -1,0 +1,47 @@
+# Music Splitter — Docker Compose
+#
+# Usage:
+#   docker-compose up              (CPU mode)
+#   docker-compose up --build      (rebuild after changes)
+#
+# For GPU support, uncomment the deploy section in the backend service
+# and ensure nvidia-docker runtime is installed.
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: music-splitter-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/outputs:/app/outputs
+    environment:
+      - DEMUCS_DEVICE=cpu
+      - DEMUCS_SHIFTS=1
+      - DEMUCS_OVERLAP=0.25
+      - DEMUCS_SEGMENT=10
+    restart: unless-stopped
+    # Uncomment below for GPU support (requires nvidia-docker):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # environment:
+    #   - DEMUCS_DEVICE=cuda
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: music-splitter-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped

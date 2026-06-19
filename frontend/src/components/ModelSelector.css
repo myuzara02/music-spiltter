@@ -1,0 +1,109 @@
+/* Model Selector Styles */
+
+.model-selector {
+  width: 100%;
+  margin-top: var(--space-lg);
+}
+
+.model-selector__label {
+  color: var(--color-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.model-selector__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.model-card {
+  position: relative;
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-lg);
+  padding: var(--space-md);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  font-family: var(--font-sans);
+}
+
+.model-card:hover {
+  background-color: var(--color-surface-card-elevated);
+  border-color: var(--color-hairline-strong);
+}
+
+.model-card--active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary), 0 0 20px -4px rgba(0, 7, 205, 0.3);
+}
+
+.model-card--active:hover {
+  border-color: var(--color-primary-glow);
+}
+
+.model-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.model-card__icon {
+  font-size: 24px;
+  line-height: 1;
+  color: var(--color-primary);
+}
+
+.model-card__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-body-strong);
+  display: block;
+}
+
+.model-card__sublabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.model-card__description {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin-bottom: var(--space-sm);
+  line-height: 1.4;
+}
+
+.model-card__stems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xxs);
+}
+
+.model-card__stem-tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-body);
+  background-color: var(--color-canvas-deep);
+  padding: 2px 8px;
+  border-radius: var(--rounded-xs);
+  letter-spacing: 0.3px;
+}
+
+.model-card__check {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 4px var(--color-primary-glow));
+}
+
+@media (max-width: 640px) {
+  .model-selector__grid {
+    grid-template-columns: 1fr;
+  }
+}

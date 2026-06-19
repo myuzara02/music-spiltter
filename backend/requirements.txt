@@ -1,0 +1,16 @@
+# Music Splitter Backend — Dependencies
+
+fastapi==0.115.13
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+pydantic==2.11.3
+websockets==15.0.1
+
+# AI / Audio Processing
+git+https://github.com/facebookresearch/demucs.git
+torch>=2.0.0
+torchaudio>=2.0.0
+numpy<2
+
+# Utilities
+python-dotenv==1.1.0

@@ -1,0 +1,69 @@
+/* Stem Card Styles */
+
+.stem-card {
+  position: relative;
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-hairline-soft);
+  border-radius: var(--rounded-lg);
+  overflow: hidden;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.stem-card:hover {
+  background-color: var(--color-surface-card-elevated);
+  border-color: var(--color-hairline);
+  transform: translateY(-2px);
+}
+
+.stem-card__indicator {
+  height: 3px;
+  width: 100%;
+}
+
+.stem-card__content {
+  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-base);
+}
+
+.stem-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.stem-card__icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.stem-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stem-card__name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-body-strong);
+  text-transform: capitalize;
+}
+
+.stem-card__size {
+  font-size: 13px;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+}
+
+.stem-card__download {
+  text-decoration: none;
+  flex-shrink: 0;
+  font-size: 13px;
+  height: 36px;
+  padding: 8px 14px;
+}

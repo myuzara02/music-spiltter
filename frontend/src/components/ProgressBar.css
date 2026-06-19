@@ -1,0 +1,135 @@
+/* Progress Bar Styles */
+
+.progress-section {
+  position: relative;
+  padding: var(--space-section) 0;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.progress-section__glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    circle,
+    rgba(26, 38, 255, 0.12) 0%,
+    rgba(26, 38, 255, 0.03) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+.progress-section__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.progress-content {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xxl);
+}
+
+.progress-header {
+  text-align: center;
+}
+
+.progress-message {
+  margin-top: var(--space-xs);
+  font-size: 16px;
+  color: var(--color-body);
+}
+
+/* Progress bar */
+.progress-bar-wrapper {
+  width: 100%;
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-surface-card);
+  border-radius: var(--rounded-pill);
+  overflow: visible;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-glow));
+  border-radius: var(--rounded-pill);
+  transition: width 0.5s ease-out;
+  position: relative;
+}
+
+.progress-bar__glow {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background: radial-gradient(circle, var(--color-primary-glow), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: left 0.5s ease-out;
+  opacity: 0.8;
+}
+
+.progress-bar__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-sm);
+}
+
+.progress-bar__stage {
+  font-size: 14px;
+  color: var(--color-body);
+}
+
+.progress-bar__percent {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-body-strong);
+}
+
+/* Equalizer animation */
+.progress-equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 40px;
+  opacity: 0.4;
+}
+
+.progress-equalizer__bar {
+  width: 4px;
+  background: linear-gradient(to top, var(--color-primary), var(--color-primary-glow));
+  border-radius: 2px;
+  animation: equalizerBounce 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes equalizerBounce {
+  0% { transform: scaleY(0.3); opacity: 0.4; }
+  50% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(0.5); opacity: 0.6; }
+}
+
+@media (max-width: 640px) {
+  .progress-section {
+    padding: var(--space-xxl) 0;
+    min-height: auto;
+  }
+}

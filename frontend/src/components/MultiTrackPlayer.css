@@ -1,0 +1,502 @@
+.daw-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: #0c0c0c;
+  color: #fff;
+}
+
+.daw-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid #222;
+  background-color: #121212;
+}
+
+.daw-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.daw-header__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.daw-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-daw-outline {
+  background: transparent;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-daw-outline:hover {
+  background: #222;
+}
+
+.daw-info-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1a1a1a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #a8a8a8;
+  border: 1px solid #222;
+}
+
+.daw-workspace {
+  flex-grow: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.daw-track-controls {
+  width: 280px;
+  min-width: 280px;
+  background-color: #121212;
+  border-right: 1px solid #222;
+  display: flex;
+  flex-direction: column;
+  padding-top: 24px; /* for timeline offset */
+  z-index: 10;
+}
+
+.daw-waveforms {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #0c0c0c;
+  position: relative;
+}
+
+.daw-timeline {
+  height: 24px;
+  min-height: 24px;
+  border-bottom: 1px solid #222;
+  background: #121212;
+  color: #888;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.playhead-marker {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 16px;
+  background-color: #ffffff;
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: none;
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+}
+
+.daw-transport {
+  height: 80px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid #222;
+  background-color: #121212;
+  padding: 0 24px;
+  gap: 12px;
+}
+
+.transport-buttons {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.btn-transport {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-transport:hover {
+  color: #00BCD4;
+}
+
+.btn-transport.play {
+  background: #222;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+}
+.btn-transport.play:hover {
+  background: #333;
+}
+
+.transport-time {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 600px;
+  font-size: 0.8rem;
+  color: #a8a8a8;
+}
+
+.transport-progress {
+  flex-grow: 1;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+
+.transport-progress-fill {
+  height: 100%;
+  background: #00BCD4;
+  border-radius: 2px;
+}
+
+/* Track Row Controls */
+.daw-track-header {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid #222;
+  gap: 12px;
+}
+
+.track-ms {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.btn-ms {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #222;
+  color: #888;
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-ms.active-m {
+  background: #666;
+  color: #fff;
+  border-color: #666;
+}
+
+.btn-ms.active-s {
+  background: #FFD700;
+  color: #000;
+  border-color: #FFD700;
+}
+
+.track-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  flex-grow: 1;
+  text-transform: capitalize;
+}
+
+.track-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.track-volume {
+  width: 60px;
+}
+
+.track-volume input[type=range] {
+  width: 100%;
+  accent-color: #00BCD4;
+  height: 4px;
+  background: #333;
+  outline: none;
+  -webkit-appearance: none;
+  border-radius: 2px;
+}
+.track-volume input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00BCD4;
+  cursor: pointer;
+}
+
+.track-knob {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.knob-label {
+  font-size: 0.55rem;
+  color: #666;
+  letter-spacing: 2px;
+}
+
+/* Waveform Row */
+.daw-track-wave {
+  height: 100px;
+  border-bottom: 1px solid #222;
+  position: relative;
+}
+
+.daw-track-wave:hover {
+  background: #111;
+}
+
+/* Mobile Responsive Layout (Moises Inspiration) */
+@media (max-width: 768px) {
+  .daw-workspace {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .daw-track-controls {
+    width: 100%;
+    min-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #222;
+    padding-top: 0;
+  }
+
+  .daw-track-controls .daw-timeline {
+    display: none; /* Hide empty timeline spacer on mobile */
+  }
+
+  .daw-track-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 
+      "ms name knob"
+      "vol vol vol";
+    height: auto;
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  .track-ms { 
+    grid-area: ms; 
+    align-items: center;
+  }
+  
+  .track-name { 
+    grid-area: name; 
+    display: flex; 
+    align-items: center; 
+    padding-left: 12px; 
+  }
+  
+  .track-controls-right { 
+    display: contents; /* Unwraps children for grid placement */
+  }
+  
+  .track-knob { 
+    grid-area: knob; 
+    justify-self: end; 
+  }
+  
+  .track-volume { 
+    grid-area: vol; 
+    width: 100%; 
+    padding-top: 8px;
+  }
+
+  .daw-waveforms {
+    display: none; /* Hide waveforms on mobile to focus on mixer like Moises */
+  }
+
+  /* Header adjustments */
+  .daw-header {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .daw-info-box {
+    display: none; /* Hide BPM/Key to save space */
+  }
+
+  .daw-header__title {
+    display: none;
+  }
+
+  .btn-daw-outline {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  /* Transport adjustments */
+  .daw-transport {
+    padding: 16px;
+    height: auto;
+    gap: 16px;
+  }
+
+  .transport-buttons {
+    gap: 20px;
+  }
+
+  .transport-time {
+    width: 100%;
+  }
+}
+
+/* Export Modal */
+.export-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.export-modal {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  color: #eee;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.export-modal h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #00BCD4;
+}
+
+.export-modal-list {
+  background: #111;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.export-modal-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #222;
+  font-size: 0.95rem;
+}
+
+.export-modal-item:last-child {
+  border-bottom: none;
+}
+
+.export-modal-item .stem-name {
+  text-transform: capitalize;
+  font-weight: bold;
+  width: 30%;
+}
+
+.export-modal-item .stem-status {
+  text-align: right;
+  flex-grow: 1;
+}
+
+.export-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.export-modal-actions button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cancel {
+  background: transparent;
+  color: #888;
+  border: 1px solid #444;
+}
+
+.btn-cancel:hover {
+  background: #333;
+  color: #fff;
+}
+
+.btn-confirm {
+  background: #00BCD4;
+  color: #000;
+}
+
+.btn-confirm:hover {
+  background: #0097a7;
+}
+
+.btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loader {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top: 2px solid #000;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

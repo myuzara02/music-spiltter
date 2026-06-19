@@ -1,0 +1,77 @@
+/* App Styles */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  position: relative;
+}
+
+/* Upload overlay */
+.upload-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 15, 15, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-base);
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.upload-overlay__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-hairline);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.upload-overlay__text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-body-strong);
+}
+
+/* Error banner */
+.error-banner {
+  padding: var(--space-section) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.error-banner__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  text-align: center;
+}
+
+.error-banner__message {
+  font-size: 16px;
+  color: var(--color-error);
+  max-width: 500px;
+}

@@ -1,0 +1,9 @@
+.daw-wrapper {
+  background-color: #0c0c0c;
+  min-height: 100vh;
+  width: 100vw;
+  color: #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
