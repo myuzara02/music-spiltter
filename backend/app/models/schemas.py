@@ -49,6 +49,8 @@ class JobResult(BaseModel):
     model_used: str
     stems: List[StemInfo] = []
     chords: List[ChordSegment] = []
+    bpm: float = 120.0
+    beats: List[float] = []
     error_message: Optional[str] = None
 
 

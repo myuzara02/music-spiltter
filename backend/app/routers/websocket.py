@@ -19,6 +19,7 @@ from app.config import MODELS, OUTPUT_DIR, UPLOAD_DIR
 from app.models.schemas import ChordSegment, JobResult, StemInfo
 from app.services.separator import separator_service
 from app.services.chord_detector import chord_detector_service
+from app.services.beat_detector import beat_detector_service
 
 logger = logging.getLogger(__name__)
 
@@ -142,12 +143,36 @@ async def websocket_progress(websocket: WebSocket, job_id: str):
             logger.warning(f"Job {job_id}: chord detection failed (non-fatal): {chord_err}")
             chord_segments = []
 
+        # Stage 5: Beat and BPM detection
+        await send_progress(96.0, "detecting_beats", None)
+        try:
+            bpm, beats = await asyncio.to_thread(
+                beat_detector_service.detect_beats,
+                str(input_path),
+            )
+            
+            # Save beats data to JSON file
+            beat_data = {
+                "job_id": job_id,
+                "bpm": bpm,
+                "beats": beats,
+            }
+            beat_file = output_dir / "beats.json"
+            beat_file.write_text(json.dumps(beat_data, indent=2))
+            logger.info(f"Job {job_id}: beat detection complete, BPM={bpm}, {len(beats)} beats")
+        except Exception as beat_err:
+            logger.warning(f"Job {job_id}: beat detection failed (non-fatal): {beat_err}")
+            bpm = 120.0
+            beats = []
+
         result = JobResult(
             job_id=job_id,
             status="complete",
             model_used=model_name,
             stems=stems,
             chords=chord_segments,
+            bpm=bpm,
+            beats=beats,
         )
 
         await websocket.send_json({
@@ -184,6 +209,7 @@ def _stage_message(stage: str, current_stem: Optional[str], percent: float) -> s
         "separating": "Separating audio tracks...",
         "saving": f"Saving {current_stem}..." if current_stem else "Saving stems...",
         "detecting_chords": "Detecting chords...",
+        "detecting_beats": "Detecting tempo & beats...",
         "complete": "Separation complete!",
         "error": "An error occurred.",
     }
