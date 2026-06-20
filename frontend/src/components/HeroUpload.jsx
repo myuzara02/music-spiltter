@@ -17,7 +17,7 @@ function formatFileSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function HeroUpload({ onUpload, disabled }) {
+export default function HeroUpload({ onUpload, disabled, onLoadDemo }) {
   const [file, setFile] = useState(null);
   const [model, setModel] = useState('htdemucs_ft');
   const [isDragging, setIsDragging] = useState(false);
@@ -166,19 +166,37 @@ export default function HeroUpload({ onUpload, disabled }) {
           {/* Model selector */}
           <ModelSelector selectedModel={model} onSelectModel={setModel} />
 
-          {/* Submit button */}
-          <button
-            className="btn-primary hero__submit"
-            onClick={handleSubmit}
-            disabled={!file || disabled}
-            id="split-button"
-            type="button"
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-            </svg>
-            Split Now
-          </button>
+          {/* Actions */}
+          <div className="hero__actions" style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '8px' }}>
+            <button
+              className="btn-primary hero__submit"
+              onClick={handleSubmit}
+              disabled={!file || disabled}
+              id="split-button"
+              type="button"
+              style={{ flex: 1, margin: 0 }}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+              </svg>
+              Split Now
+            </button>
+            {onLoadDemo && (
+              <button
+                className="btn-daw-outline hero__submit"
+                onClick={onLoadDemo}
+                disabled={disabled}
+                id="demo-button"
+                type="button"
+                style={{ flex: 1, margin: 0, borderColor: '#00BCD4', color: '#00BCD4' }}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                </svg>
+                Load Demo (Lovesong)
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </section>

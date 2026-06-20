@@ -12,5 +12,10 @@ torch>=2.0.0
 torchaudio>=2.0.0
 numpy<2
 
+# Chord Detection
+cython
+git+https://github.com/CPJKU/madmom.git
+
 # Utilities
+setuptools<72
 python-dotenv==1.1.0

@@ -2,9 +2,10 @@
  * Music Splitter — DAW Player
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.esm.js';
+import ChordTimeline from './ChordTimeline';
 import './MultiTrackPlayer.css';
 
 // SVG Icons
@@ -16,6 +17,8 @@ const LoopIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="24" h
 const BackIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>;
 const SeparateIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>;
 const ExportIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>;
+const ZoomInIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM12 10h-2v2H9v-2H7V9h2V7h1v2h2v1z"/></svg>;
+const ZoomOutIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z"/></svg>;
 
 const formatTime = (seconds) => {
   if (isNaN(seconds)) return '00:00';
@@ -217,11 +220,146 @@ function TrackWaveform({ stem, isMaster, onReady, onPlayPause, onSeek, effective
   );
 }
 
-export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll }) {
+export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll, chords }) {
   const timelineRef = useRef(null);
+  const scrollContainerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [zoom, setZoom] = useState(1);
+
+  // Auto-scroll follow variables
+  const [autoScrollSuspended, setAutoScrollSuspended] = useState(false);
+  const userScrollTimeoutRef = useRef(null);
+  const expectedScrollLeftRef = useRef(0);
+  const zoomChangeBypassRef = useRef(false);
+
+  // Set bypass when zoom changes to prevent scroll triggers
+  useEffect(() => {
+    zoomChangeBypassRef.current = true;
+    const timer = setTimeout(() => {
+      zoomChangeBypassRef.current = false;
+      if (scrollContainerRef.current) {
+        expectedScrollLeftRef.current = scrollContainerRef.current.scrollLeft;
+      }
+    }, 150); // 150ms bypass window after zoom change
+    return () => clearTimeout(timer);
+  }, [zoom]);
+
+  // Handle touchpad pinch and Cmd/Ctrl + Scroll Zoom shortcuts
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        
+        const rect = container.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const scrollLeft = container.scrollLeft;
+        
+        const zoomFactor = -e.deltaY * 0.005;
+        
+        setZoom(prev => {
+          const nextZoom = Math.max(1, Math.min(8, prev + zoomFactor));
+          if (nextZoom !== prev) {
+            const ratio = nextZoom / prev;
+            const newScrollLeft = ratio * (scrollLeft + mouseX) - mouseX;
+            requestAnimationFrame(() => {
+              expectedScrollLeftRef.current = Math.round(newScrollLeft);
+              container.scrollLeft = newScrollLeft;
+            });
+          }
+          return nextZoom;
+        });
+      }
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
+
+  // Listen to manual scroll events to temporarily suspend auto-scroll
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      if (zoomChangeBypassRef.current) {
+        expectedScrollLeftRef.current = container.scrollLeft;
+        return;
+      }
+
+      const currentScroll = container.scrollLeft;
+      const expectedScroll = expectedScrollLeftRef.current;
+      const difference = Math.abs(currentScroll - expectedScroll);
+
+      // If actual scroll position deviates from programmatically set scroll position
+      // by more than a small threshold (e.g. 5px), the user has scrolled manually.
+      if (difference > 5) {
+        // User scrolled manually, suspend auto-scroll
+        setAutoScrollSuspended(true);
+
+        // Clear previous timeout and set a new one for 3 seconds of inactivity
+        if (userScrollTimeoutRef.current) {
+          clearTimeout(userScrollTimeoutRef.current);
+        }
+        userScrollTimeoutRef.current = setTimeout(() => {
+          expectedScrollLeftRef.current = container.scrollLeft;
+          setAutoScrollSuspended(false);
+        }, 3000);
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (userScrollTimeoutRef.current) {
+        clearTimeout(userScrollTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Reset suspension state if playback is paused/reset
+  useEffect(() => {
+    if (!isPlaying) {
+      setAutoScrollSuspended(false);
+      if (userScrollTimeoutRef.current) {
+        clearTimeout(userScrollTimeoutRef.current);
+      }
+    }
+  }, [isPlaying]);
+
+  // Auto-scroll to follow playhead when playing and zoomed in
+  useEffect(() => {
+    if (!isPlaying || duration <= 0 || zoom <= 1 || autoScrollSuspended) return;
+    
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    const scrollWidth = container.scrollWidth;
+    const clientWidth = container.clientWidth;
+    const scrollLeft = container.scrollLeft;
+    
+    const playheadX = (currentTime / duration) * scrollWidth;
+    
+    // Auto-scroll forward only when playhead completely exits the visible viewport (right edge)
+    const rightThreshold = scrollLeft + clientWidth;
+    
+    // Auto-scroll backward only when playhead goes to the left of the visible viewport (left edge)
+    const leftThreshold = scrollLeft;
+    
+    if (playheadX > rightThreshold) {
+      expectedScrollLeftRef.current = Math.round(playheadX);
+      container.scrollLeft = playheadX;
+    } else if (playheadX < leftThreshold) {
+      expectedScrollLeftRef.current = Math.round(playheadX);
+      container.scrollLeft = playheadX;
+    }
+  }, [currentTime, duration, isPlaying, zoom, autoScrollSuspended]);
   
   const [volumes, setVolumes] = useState(() => {
     const init = {};
@@ -240,6 +378,38 @@ export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll 
 
   const [showExportModal, setShowExportModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Zoom handlers
+  const handleZoomIn = useCallback(() => {
+    setZoom(prev => Math.min(prev + 0.5, 8));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoom(prev => Math.max(prev - 0.5, 1));
+  }, []);
+
+  // Compute current and next chord from playback position
+  const currentChordInfo = useMemo(() => {
+    if (!chords || chords.length === 0) return { current: null, next: null };
+    let currentIdx = -1;
+    for (let i = 0; i < chords.length; i++) {
+      if (currentTime >= chords[i].start && currentTime < chords[i].end) {
+        currentIdx = i;
+        break;
+      }
+    }
+    const current = currentIdx >= 0 ? chords[currentIdx] : null;
+    // Find next non-'N' chord
+    let next = null;
+    const searchFrom = currentIdx >= 0 ? currentIdx + 1 : 0;
+    for (let i = searchFrom; i < chords.length; i++) {
+      if (chords[i].label !== 'N') {
+        next = chords[i];
+        break;
+      }
+    }
+    return { current, next };
+  }, [chords, currentTime]);
 
   const handleVolumeChange = useCallback((stemName, value) => {
     setVolumes(prev => ({ ...prev, [stemName]: value }));
@@ -403,20 +573,37 @@ export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll 
         </div>
         <div className="daw-header__right">
           <button className="btn-daw-outline" onClick={onReset}>
-            <SeparateIcon /> Separate tracks
+            <SeparateIcon /> <span className="btn-text">Separate tracks</span>
           </button>
-          <div className="daw-info-box">
-            <span>BPM</span> <strong>120</strong>
-          </div>
-          <div className="daw-info-box">
-            <span>Key</span> <strong>C</strong>
+          {/* Dynamic chord display */}
+          {chords && chords.length > 0 && (
+            <>
+              <div className="daw-info-box chord-now">
+                <span>Now</span>
+                <strong>{currentChordInfo.current && currentChordInfo.current.label !== 'N' ? currentChordInfo.current.label : '–'}</strong>
+              </div>
+              <div className="daw-info-box chord-next">
+                <span>Next</span>
+                <strong>{currentChordInfo.next ? currentChordInfo.next.label : '–'}</strong>
+              </div>
+            </>
+          )}
+          {/* Zoom controls */}
+          <div className="daw-zoom-controls">
+            <button className="btn-zoom" onClick={handleZoomOut} disabled={zoom <= 1} title="Zoom Out">
+              <ZoomOutIcon />
+            </button>
+            <span className="zoom-level">{zoom.toFixed(1)}x</span>
+            <button className="btn-zoom" onClick={handleZoomIn} disabled={zoom >= 8} title="Zoom In">
+              <ZoomInIcon />
+            </button>
           </div>
           <button className="btn-daw-outline" onClick={onDownloadAll}>
             <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" transform="rotate(180, 12, 12)"/></svg> 
-            Download All
+            <span className="btn-text">Download All</span>
           </button>
           <button className="btn-daw-outline" onClick={handleExportClick} style={{ borderColor: '#00BCD4', color: '#00BCD4' }}>
-            <ExportIcon /> Export Mix
+            <ExportIcon /> <span className="btn-text">Export Mix</span>
           </button>
         </div>
       </header>
@@ -424,7 +611,7 @@ export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll 
       {/* Main Split View */}
       <div className="daw-workspace">
         <div className="daw-track-controls">
-          <div className="daw-timeline" style={{ borderBottom: 'none' }}></div> {/* Spacer for timeline */}
+          <div className="daw-timeline" style={{ borderBottom: 'none', height: chords && chords.length > 0 ? '60px' : '24px' }}></div> {/* Spacer for timeline + chord */}
           {stems.map((stem) => (
             <TrackControl
               key={stem.name}
@@ -441,23 +628,31 @@ export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll 
           ))}
         </div>
 
-        <div className="daw-waveforms">
-          <div 
-            className="daw-timeline" 
-            ref={timelineRef}
-            onPointerDown={onTimelinePointerDown}
-            onPointerMove={onTimelinePointerMove}
-            onPointerUp={onTimelinePointerUp}
-            style={{ cursor: 'text', position: 'relative' }}
-          >
-            {duration > 0 && (
-              <div 
-                className="playhead-marker" 
-                style={{ left: `${(currentTime / duration) * 100}%` }}
-              ></div>
+        <div className="daw-waveforms" ref={scrollContainerRef} style={{ overflowX: zoom > 1 ? 'auto' : 'hidden' }}>
+          <div className="daw-zoom-content" style={{ width: `${zoom * 100}%`, minWidth: '100%' }}>
+            <div 
+              className="daw-timeline" 
+              ref={timelineRef}
+              onPointerDown={onTimelinePointerDown}
+              onPointerMove={onTimelinePointerMove}
+              onPointerUp={onTimelinePointerUp}
+              style={{ cursor: 'text', position: 'relative' }}
+            >
+              {duration > 0 && (
+                <div 
+                  className="playhead-marker" 
+                  style={{ left: `${(currentTime / duration) * 100}%` }}
+                ></div>
+              )}
+            </div>
+            {/* Chord Timeline */}
+            {chords && chords.length > 0 && (
+              <ChordTimeline
+                chords={chords}
+                currentTime={currentTime}
+                duration={duration}
+              />
             )}
-          </div>
-          <div className="daw-tracks-scroll">
             {stems.map((stem, index) => (
               <TrackWaveform
                 key={stem.name}

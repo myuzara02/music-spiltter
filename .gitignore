@@ -17,7 +17,7 @@ env/
 .venv/
 
 # Audio outputs
-backend/output/
+backend/outputs/
 backend/uploads/
 
 # OS generated files

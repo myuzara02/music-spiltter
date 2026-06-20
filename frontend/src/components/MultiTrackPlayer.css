@@ -356,12 +356,34 @@
     display: none; /* Hide BPM/Key to save space */
   }
 
+  .daw-info-box.chord-now,
+  .daw-info-box.chord-next {
+    display: flex !important;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    gap: 4px;
+    border-radius: 4px;
+  }
+
+  .chord-now strong,
+  .chord-next strong {
+    font-size: 0.9rem;
+  }
+
+  .daw-zoom-controls {
+    display: none !important;
+  }
+
+  .btn-text {
+    display: none !important;
+  }
+
   .daw-header__title {
     display: none;
   }
 
   .btn-daw-outline {
-    padding: 6px 12px;
+    padding: 8px;
     font-size: 0.8rem;
   }
 
@@ -500,3 +522,64 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Zoom controls and chord display styles */
+.daw-zoom-controls {
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.btn-zoom {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-zoom:hover:not(:disabled) {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.btn-zoom:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.zoom-level {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ccc;
+  min-width: 36px;
+  text-align: center;
+}
+
+.chord-now strong {
+  color: #00BCD4;
+  font-size: 1.1rem;
+  text-shadow: 0 0 8px rgba(0, 188, 212, 0.4);
+}
+
+.chord-next strong {
+  color: #9C27B0;
+  font-size: 1rem;
+}
+
+.daw-zoom-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+

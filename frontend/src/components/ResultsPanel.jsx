@@ -36,6 +36,7 @@ export default function ResultsPanel({ result, onReset }) {
       <MultiTrackPlayer 
         stems={result.stems} 
         jobId={result.job_id} 
+        chords={result.chords}
         onDownloadAll={handleDownloadAll} 
         onReset={onReset} 
       />

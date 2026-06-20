@@ -1,0 +1,93 @@
+/* ChordTimeline — Chord display bar above waveforms */
+
+.chord-timeline {
+  display: flex;
+  height: 36px;
+  background: #111;
+  border-bottom: 1px solid #222;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.chord-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #888;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 0.15s ease, color 0.15s ease;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+  min-width: 0;
+  position: relative;
+  cursor: default;
+}
+
+.chord-segment:last-child {
+  border-right: none;
+}
+
+/* Active chord — currently playing */
+.chord-segment.active {
+  background: rgba(0, 188, 212, 0.12);
+  color: #00BCD4;
+}
+
+/* Color coding by chord quality */
+.chord-segment.major {
+  border-top: 2px solid rgba(0, 188, 212, 0.3);
+}
+
+.chord-segment.major.active {
+  border-top: 2px solid #00BCD4;
+}
+
+.chord-segment.minor {
+  border-top: 2px solid rgba(156, 39, 176, 0.3);
+}
+
+.chord-segment.minor.active {
+  border-top: 2px solid #9C27B0;
+  background: rgba(156, 39, 176, 0.12);
+  color: #CE93D8;
+}
+
+.chord-segment.no-chord {
+  color: #444;
+  border-top: 2px solid transparent;
+  font-style: italic;
+}
+
+/* Label inside segment */
+.chord-label {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Narrow segments: show abbreviated label */
+.chord-segment.narrow .chord-label {
+  font-size: 10px;
+}
+
+/* Playhead indicator line */
+.chord-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #fff;
+  z-index: 10;
+  pointer-events: none;
+  transition: left 0.05s linear;
+}

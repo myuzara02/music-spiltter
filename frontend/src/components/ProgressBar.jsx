@@ -35,6 +35,7 @@ export default function ProgressBar({ percent, stage, currentStem, message }) {
                 {stage === 'loading_model' && '🧠 Loading AI model...'}
                 {stage === 'separating' && '🎵 Separating tracks...'}
                 {stage === 'saving' && `💾 Saving ${currentStem || 'stems'}...`}
+                {stage === 'detecting_chords' && '🎸 Detecting chords...'}
                 {stage === 'connecting' && '🔌 Connecting...'}
                 {stage === 'starting' && '🚀 Starting...'}
               </span>

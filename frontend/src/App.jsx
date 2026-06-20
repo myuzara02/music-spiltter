@@ -54,6 +54,40 @@ export default function App() {
     }
   }, [ws]);
 
+  const handleLoadDemo = useCallback(async () => {
+    setAppState('processing');
+    setUploadError(null);
+    try {
+      const demoJobId = 'f907c924-04b2-4b22-99af-c532f6e6d68d';
+      const chordsRes = await fetch(`${API_BASE}/api/chords/${demoJobId}`);
+      if (!chordsRes.ok) throw new Error('Demo not available');
+      const chordsData = await chordsRes.json();
+      
+      const demoResult = {
+        job_id: demoJobId,
+        status: "complete",
+        model_used: "htdemucs_6s",
+        stems: [
+          { name: "vocals", filename: "vocals.wav", size_bytes: 73482298, download_url: `/api/download/${demoJobId}/vocals` },
+          { name: "drums", filename: "drums.wav", size_bytes: 73482298, download_url: `/api/download/${demoJobId}/drums` },
+          { name: "bass", filename: "bass.wav", size_bytes: 73482298, download_url: `/api/download/${demoJobId}/bass` },
+          { name: "guitar", filename: "guitar.wav", size_bytes: 73482298, download_url: `/api/download/${demoJobId}/guitar` },
+          { name: "piano", filename: "piano.wav", size_bytes: 73482298, download_url: `/api/download/${demoJobId}/piano` },
+          { name: "other", filename: "other.wav", size_bytes: 73482298, download_url: `/api/download/${demoJobId}/other` }
+        ],
+        chords: chordsData.chords
+      };
+      
+      ws.setResult(demoResult);
+      ws.setStage('complete');
+      setAppState('complete');
+    } catch (err) {
+      console.error('Demo load error:', err);
+      setUploadError(err.message || 'Failed to load demo.');
+      setAppState('error');
+    }
+  }, [ws]);
+
   const handleReset = useCallback(() => {
     ws.reset();
     setAppState('idle');
@@ -75,6 +109,7 @@ export default function App() {
           <HeroUpload
             onUpload={handleUpload}
             disabled={appState === 'uploading'}
+            onLoadDemo={handleLoadDemo}
           />
         )}
 

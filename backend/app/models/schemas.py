@@ -27,6 +27,13 @@ class ProgressUpdate(BaseModel):
     message: str = ""
 
 
+class ChordSegment(BaseModel):
+    """A single chord segment with timing."""
+    start: float        # Start time in seconds
+    end: float          # End time in seconds
+    label: str          # Chord label (e.g., "C", "Am", "G7")
+
+
 class StemInfo(BaseModel):
     """Info about a single separated stem."""
     name: str
@@ -41,6 +48,7 @@ class JobResult(BaseModel):
     status: str  # "complete" or "error"
     model_used: str
     stems: List[StemInfo] = []
+    chords: List[ChordSegment] = []
     error_message: Optional[str] = None
 
 

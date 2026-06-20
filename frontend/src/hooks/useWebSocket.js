@@ -96,5 +96,7 @@ export function useWebSocket() {
     connect,
     disconnect,
     reset,
+    setResult,
+    setStage,
   };
 }
