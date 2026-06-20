@@ -657,7 +657,7 @@ export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll,
           <div className="daw-header__title">Music Splitter Project</div>
         </div>
         <div className="daw-header__right">
-          <button className="btn-daw-outline" onClick={onReset}>
+          <button className="btn-daw-outline btn-separate-tracks" onClick={onReset}>
             <SeparateIcon /> <span className="btn-text">Separate tracks</span>
           </button>
           {/* Dynamic chord display */}

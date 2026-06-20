@@ -348,8 +348,20 @@
 
   /* Header adjustments */
   .daw-header {
-    padding: 0 12px;
-    height: 56px;
+    padding: 0 8px;
+    height: 48px;
+  }
+
+  .daw-header__left {
+    gap: 4px;
+  }
+
+  .daw-header__right {
+    gap: 6px;
+  }
+
+  .daw-header__right > * {
+    flex-shrink: 0;
   }
 
   .daw-info-box {
@@ -360,15 +372,28 @@
   .daw-info-box.chord-next,
   .daw-info-box.bpm-box {
     display: flex !important;
-    padding: 6px 10px;
-    font-size: 0.75rem;
+    padding: 0 8px;
+    font-size: 0.7rem;
     gap: 4px;
     border-radius: 4px;
+    height: 32px;
+    align-items: center;
+  }
+
+  .daw-info-box span {
+    font-size: 0.65rem;
   }
 
   .chord-now strong,
-  .chord-next strong {
-    font-size: 0.9rem;
+  .chord-next strong,
+  .bpm-box strong {
+    font-size: 0.8rem;
+  }
+
+  .flash-dot {
+    width: 6px;
+    height: 6px;
+    margin-left: 2px;
   }
 
   .daw-zoom-controls {
@@ -383,8 +408,18 @@
     display: none;
   }
 
-  .btn-daw-outline {
-    padding: 8px;
+  .btn-separate-tracks {
+    display: none !important;
+  }
+
+  .btn-daw-outline,
+  .btn-metronome {
+    padding: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     font-size: 0.8rem;
   }
 
