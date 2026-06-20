@@ -19,6 +19,7 @@ const SeparateIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="1
 const ExportIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>;
 const ZoomInIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM12 10h-2v2H9v-2H7V9h2V7h1v2h2v1z"/></svg>;
 const ZoomOutIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z"/></svg>;
+const MetronomeIcon = () => <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5h-2v-5h2v5zm0-7h-2V7h2v2.5z"/></svg>;
 
 const formatTime = (seconds) => {
   if (isNaN(seconds)) return '00:00';
@@ -220,13 +221,42 @@ function TrackWaveform({ stem, isMaster, onReady, onPlayPause, onSeek, effective
   );
 }
 
-export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll, chords }) {
+const playMetronomeClick = (audioCtx, time, isDownbeat) => {
+  if (!audioCtx) return;
+  try {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.frequency.setValueAtTime(isDownbeat ? 1000 : 800, time);
+    
+    gainNode.gain.setValueAtTime(0.5, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+    
+    osc.start(time);
+    osc.stop(time + 0.05);
+  } catch (e) {
+    console.warn("Failed to play metronome click:", e);
+  }
+};
+
+export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll, chords, beats, bpm }) {
   const timelineRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [zoom, setZoom] = useState(1);
+  const [isMetronomeEnabled, setIsMetronomeEnabled] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const audioContextRef = useRef(null);
+  const nextBeatIndexRef = useRef(0);
+  const flashTimeoutRef = useRef(null);
 
   // Auto-scroll follow variables
   const [autoScrollSuspended, setAutoScrollSuspended] = useState(false);
@@ -360,6 +390,61 @@ export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll,
       container.scrollLeft = playheadX;
     }
   }, [currentTime, duration, isPlaying, zoom, autoScrollSuspended]);
+
+  // Handle metronome ticks and visual flash as playhead progresses
+  useEffect(() => {
+    if (!isPlaying || !beats || beats.length === 0) return;
+
+    // Initialize AudioContext if enabled
+    if (isMetronomeEnabled && !audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    const audioCtx = audioContextRef.current;
+    
+    // Find next beat index relative to current time
+    let nextBeatIndex = nextBeatIndexRef.current;
+    
+    // If the playhead jumped (seeked) far away, recalculate index
+    if (nextBeatIndex >= beats.length || beats[nextBeatIndex] < currentTime - 0.2 || beats[nextBeatIndex] > currentTime + 0.5) {
+      nextBeatIndex = beats.findIndex(t => t >= currentTime);
+      if (nextBeatIndex === -1) nextBeatIndex = beats.length;
+      nextBeatIndexRef.current = nextBeatIndex;
+    }
+
+    if (nextBeatIndex < beats.length) {
+      const nextBeatTime = beats[nextBeatIndex];
+      // If we crossed the next beat time
+      if (currentTime >= nextBeatTime) {
+        const isDownbeat = nextBeatIndex % 4 === 0;
+
+        if (isMetronomeEnabled && audioCtx) {
+          playMetronomeClick(audioCtx, audioCtx.currentTime, isDownbeat);
+        }
+
+        // Trigger visual flash
+        setIsFlashing(true);
+        if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = setTimeout(() => {
+          setIsFlashing(false);
+        }, 120);
+
+        nextBeatIndexRef.current = nextBeatIndex + 1;
+      }
+    }
+  }, [currentTime, isPlaying, beats, isMetronomeEnabled]);
+
+  // Clean up AudioContext & Timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+      if (flashTimeoutRef.current) {
+        clearTimeout(flashTimeoutRef.current);
+      }
+    };
+  }, []);
   
   const [volumes, setVolumes] = useState(() => {
     const init = {};
@@ -587,6 +672,23 @@ export default function MultiTrackPlayer({ stems, jobId, onReset, onDownloadAll,
                 <strong>{currentChordInfo.next ? currentChordInfo.next.label : '–'}</strong>
               </div>
             </>
+          )}
+          {/* BPM and Metronome */}
+          {bpm && (
+            <div className="daw-info-box bpm-box">
+              <span>BPM</span>
+              <strong>{Math.round(bpm)}</strong>
+              <div className={`flash-dot ${isFlashing ? 'active' : ''}`} />
+            </div>
+          )}
+          {beats && beats.length > 0 && (
+            <button 
+              className={`btn-metronome ${isMetronomeEnabled ? 'active' : ''}`}
+              onClick={() => setIsMetronomeEnabled(prev => !prev)}
+              title="Toggle Metronome Sound"
+            >
+              <MetronomeIcon />
+            </button>
           )}
           {/* Zoom controls */}
           <div className="daw-zoom-controls">

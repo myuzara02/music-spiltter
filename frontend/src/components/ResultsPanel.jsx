@@ -37,6 +37,8 @@ export default function ResultsPanel({ result, onReset }) {
         stems={result.stems} 
         jobId={result.job_id} 
         chords={result.chords}
+        beats={result.beats}
+        bpm={result.bpm}
         onDownloadAll={handleDownloadAll} 
         onReset={onReset} 
       />
