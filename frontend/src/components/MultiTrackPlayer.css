@@ -426,8 +426,8 @@
     display: none !important; /* Keep duplicate separate tracks button hidden */
   }
 
-  .btn-daw-outline,
-  .btn-metronome {
+  .daw-header .btn-daw-outline,
+  .daw-header .btn-metronome {
     padding: 8px 12px !important;
     width: 38px !important;
     height: 38px !important;
