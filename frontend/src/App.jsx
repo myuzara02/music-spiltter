@@ -59,9 +59,19 @@ export default function App() {
     setUploadError(null);
     try {
       const demoJobId = 'f907c924-04b2-4b22-99af-c532f6e6d68d';
-      const chordsRes = await fetch(`${API_BASE}/api/chords/${demoJobId}`);
-      if (!chordsRes.ok) throw new Error('Demo not available');
-      const chordsData = await chordsRes.json();
+      
+      // Fetch both chords and beats in parallel
+      const [chordsRes, beatsRes] = await Promise.all([
+        fetch(`${API_BASE}/api/chords/${demoJobId}`),
+        fetch(`${API_BASE}/api/beats/${demoJobId}`)
+      ]);
+      
+      if (!chordsRes.ok || !beatsRes.ok) throw new Error('Demo not available');
+      
+      const [chordsData, beatsData] = await Promise.all([
+        chordsRes.json(),
+        beatsRes.json()
+      ]);
       
       const demoResult = {
         job_id: demoJobId,
@@ -75,7 +85,9 @@ export default function App() {
           { name: "piano", filename: "piano.wav", size_bytes: 73482298, download_url: `/api/download/${demoJobId}/piano` },
           { name: "other", filename: "other.wav", size_bytes: 73482298, download_url: `/api/download/${demoJobId}/other` }
         ],
-        chords: chordsData.chords
+        chords: chordsData.chords,
+        bpm: beatsData.bpm,
+        beats: beatsData.beats
       };
       
       ws.setResult(demoResult);
